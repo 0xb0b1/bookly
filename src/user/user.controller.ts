@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   Param,
   Delete,
@@ -18,6 +19,11 @@ export class UserController {
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
+  }
+
+  @Get(':id')
+  findUserById(@Param() id: number) {
+    return this.userService.findOne(id);
   }
 
   @Delete(':id')

@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './guards/roles.guard';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -20,7 +21,12 @@ import { RolesGuard } from './guards/roles.guard';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       synchronize: true,
+      entities: [`${__dirname}/**/*.entity{.js,.ts}`],
+      migrations: [`${__dirname}/src/migration/{.ts,*.js}`],
+      migrationsRun: true,
+      migrationsTableName: 'migrations',
     }),
+    UserModule,
   ],
   controllers: [AppController],
   providers: [

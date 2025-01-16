@@ -42,8 +42,14 @@ export class UserService {
     return pages;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
+    console.log('🚀 ~ UserService ~ findOne ~ user:', user, id);
+    return user;
   }
 
   remove(id: number) {
