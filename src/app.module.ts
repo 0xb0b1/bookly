@@ -8,6 +8,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './guards/roles.guard';
 import { UserModule } from './user/user.module';
+import { RatingModule } from './rating/rating.module';
+import { BooksController } from './books/books.controller';
+import { BooksService } from './books/books.service';
+import { BooksModule } from './books/books.module';
 
 @Module({
   imports: [
@@ -27,14 +31,17 @@ import { UserModule } from './user/user.module';
       migrationsTableName: 'migrations',
     }),
     UserModule,
+    RatingModule,
+    BooksModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, BooksController],
   providers: [
     AppService,
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
+    BooksService,
   ],
 })
 export class AppModule {}
