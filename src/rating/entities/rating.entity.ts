@@ -5,10 +5,10 @@ import { Entity, Column, PrimaryColumn, ManyToOne } from 'typeorm';
 
 @Entity({ name: 'rating' })
 export class RatingEntity {
-  @PrimaryColumn()
+  @PrimaryColumn({ name: 'user_id' })
   userId: number;
 
-  @PrimaryColumn()
+  @PrimaryColumn({ name: 'book_id' })
   bookId: number;
 
   @Column()
