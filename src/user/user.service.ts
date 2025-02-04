@@ -4,28 +4,29 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserEntity } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { createPasswordHashed } from 'src/utils/password';
+import { ConfigService } from '@nestjs/config'; // Add ConfigService for configuration
+import { Logger } from '@nestjs/common'; // Add Logger
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name); // Initialize Logger
+
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    private configService: ConfigService, // Inject ConfigService
   ) {}
+
   async create(createUserDto: CreateUserDto): Promise<UserEntity> {
-    // const user = await this.findUserByCpf(createUserDto.cpf).catch(
-    // () => undefined,
-    // );
-    // if (user) {
-    // TODO: already exists
-    // }
+    const user = await this.userRepository.findOne({ where: { cpf: createUserDto.cpf } });
+    if (user) {
+      throw new Error('User with this CPF already exists');
+    }
 
-    // const userEmail = await this.findUserByEmail(createUserDto.email).catch(
-    // () => undefined,
-    // );
-
-    // if (userEmail) {
-    // TODO: email already exists
-    // }
+    const userEmail = await this.userRepository.findOne({ where: { email: createUserDto.email } });
+    if (userEmail) {
+      throw new Error('User with this email already exists');
+    }
 
     const passwordHashed = await createPasswordHashed(createUserDto.password);
     const newUser = await this.userRepository.save({
@@ -38,21 +39,22 @@ export class UserService {
 
   async countPages(): Promise<number> {
     const count = await this.userRepository.count({});
-    const pages = Math.ceil(count / 100);
+    const paginationLimit = this.configService.get<number>('PAGINATION_LIMIT', 100); // Use ConfigService
+    const pages = Math.ceil(count / paginationLimit);
     return pages;
   }
 
-  async findOne(id: number) {
-    const user = await this.userRepository.findOne({
-      where: {
-        id: id,
-      },
-    });
-    console.log('🚀 ~ UserService ~ findOne ~ user:', user, id);
+  async findOne(id: number): Promise<UserEntity | undefined> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    this.logger.log(`User found with id ${id}: ${user}`); // Use Logger
     return user;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number): Promise<void> {
+    const result = await this.userRepository.delete(id);
+    if (result.affected === 0) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    this.logger.log(`User with id ${id} removed`); // Log the removal
   }
 }
